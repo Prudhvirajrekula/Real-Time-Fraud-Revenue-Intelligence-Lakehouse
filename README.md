@@ -526,9 +526,3 @@ The following table documents known deviations from a production-hardened deploy
 | No Kafka topic ACLs | Any service can produce/consume any topic | Confluent RBAC; per-consumer-group ACLs; producer ACLs per service identity |
 
 See `DEPLOYMENT.md` for AWS service mappings and `SYSTEM_DESIGN.md` for architectural decision rationale in depth.
-
----
-
-## License
-
-MIT
