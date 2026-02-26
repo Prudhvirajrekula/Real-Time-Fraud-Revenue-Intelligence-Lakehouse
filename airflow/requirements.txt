@@ -1,0 +1,9 @@
+apache-airflow-providers-apache-spark==4.7.1
+apache-airflow-providers-postgres==5.10.0
+apache-airflow-providers-amazon==8.11.0
+dbt-postgres==1.7.4
+great-expectations==0.18.9
+delta-spark==2.4.0
+psycopg2-binary==2.9.9
+boto3==1.34.0
+structlog==24.1.0

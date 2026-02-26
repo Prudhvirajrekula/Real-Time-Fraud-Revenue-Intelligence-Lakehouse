@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: dim_dates
+    description: "Complete date dimension table for time-series analytics"
+    columns:
+      - name: date_key
+        tests: [not_null, unique]
+      - name: year
+        tests: [not_null]
+
+  - name: dim_users
+    description: "User dimension with behavioral segments and risk scores"
+    columns:
+      - name: user_sk
+        tests: [not_null, unique]
+      - name: user_id
+        tests: [not_null, unique]
+      - name: risk_label
+        tests:
+          - accepted_values:
+              values: ['low', 'medium', 'high']
+      - name: buyer_segment
+        tests:
+          - accepted_values:
+              values: ['power_buyer', 'frequent_buyer', 'regular_buyer', 'occasional_buyer', 'inactive']
+
+  - name: fact_orders
+    description: "Order fact table with revenue KPIs"
+    columns:
+      - name: order_fact_sk
+        tests: [not_null, unique]
+      - name: event_date
+        tests: [not_null]
+      - name: gmv
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: fraud_rate
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+
+  - name: fact_fraud_events
+    description: "Fraud event fact table for risk intelligence"
+    columns:
+      - name: fraud_fact_sk
+        tests: [not_null, unique]
+      - name: fraud_rate
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1

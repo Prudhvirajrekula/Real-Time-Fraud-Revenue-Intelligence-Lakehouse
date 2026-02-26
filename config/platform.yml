@@ -1,0 +1,227 @@
+# =============================================================================
+# Fraud & Revenue Intelligence Platform - Central Configuration
+# =============================================================================
+
+platform:
+  name: fraud-intelligence-platform
+  version: "1.0.0"
+  environment: local
+
+# ---------------------------------------------------------------------------
+# Kafka Configuration
+# ---------------------------------------------------------------------------
+kafka:
+  bootstrap_servers: "kafka:29092"
+  schema_registry_url: "http://schema-registry:8081"
+  consumer_group_prefix: "fraud-platform"
+  topics:
+    orders:
+      name: orders
+      partitions: 6
+      replication_factor: 1
+      retention_ms: 604800000   # 7 days
+      config:
+        compression.type: lz4
+        message.timestamp.type: CreateTime
+    payments:
+      name: payments
+      partitions: 6
+      replication_factor: 1
+      retention_ms: 604800000
+      config:
+        compression.type: lz4
+    users:
+      name: users
+      partitions: 3
+      replication_factor: 1
+      retention_ms: 2592000000  # 30 days
+    devices:
+      name: devices
+      partitions: 6
+      replication_factor: 1
+      retention_ms: 604800000
+    geo_events:
+      name: geo_events
+      partitions: 6
+      replication_factor: 1
+      retention_ms: 259200000   # 3 days
+    refunds:
+      name: refunds
+      partitions: 3
+      replication_factor: 1
+      retention_ms: 2592000000
+
+# ---------------------------------------------------------------------------
+# Data Lake (MinIO / S3) Configuration
+# ---------------------------------------------------------------------------
+data_lake:
+  endpoint: "http://minio:9000"
+  bucket: "fraud-platform"
+  layers:
+    bronze:
+      prefix: "bronze"
+      format: "delta"
+      checkpoint_prefix: "checkpoints/bronze"
+      tables:
+        - orders
+        - payments
+        - users
+        - devices
+        - geo_events
+        - refunds
+    silver:
+      prefix: "silver"
+      format: "delta"
+      checkpoint_prefix: "checkpoints/silver"
+      tables:
+        - orders_enriched
+        - payments_enriched
+        - user_profiles
+        - fraud_features
+    gold:
+      prefix: "gold"
+      format: "delta"
+      checkpoint_prefix: "checkpoints/gold"
+      tables:
+        - revenue_daily
+        - revenue_hourly
+        - fraud_summary
+        - user_metrics
+        - product_metrics
+
+# ---------------------------------------------------------------------------
+# Spark Configuration
+# ---------------------------------------------------------------------------
+spark:
+  master: "spark://spark-master:7077"
+  app_defaults:
+    driver_memory: "2g"
+    executor_memory: "2g"
+    executor_cores: 2
+    max_executors: 4
+  streaming:
+    trigger_interval: "30 seconds"
+    output_mode: "append"
+    checkpoint_location: "s3a://fraud-platform/checkpoints"
+  delta:
+    version: "2.4.0"
+    optimize_write: true
+    auto_compact: true
+    target_file_size_bytes: 134217728  # 128 MB
+
+# ---------------------------------------------------------------------------
+# PostgreSQL Warehouse Configuration
+# ---------------------------------------------------------------------------
+warehouse:
+  host: "postgres"
+  port: 5432
+  database: "fraud_platform"
+  schemas:
+    raw: "raw"
+    staging: "staging"
+    intermediate: "intermediate"
+    marts: "marts"
+    ml_features: "ml_features"
+
+# ---------------------------------------------------------------------------
+# ML Configuration
+# ---------------------------------------------------------------------------
+ml:
+  fraud_detection:
+    model_name: "fraud_xgboost_v1"
+    fraud_threshold: 0.70
+    feature_version: "v1"
+    retrain_interval_hours: 24
+    min_training_samples: 10000
+    xgboost_params:
+      n_estimators: 300
+      max_depth: 6
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      scale_pos_weight: 32  # ~3% fraud rate -> ~32x imbalance
+      use_label_encoder: false
+      eval_metric: "auc"
+      random_state: 42
+  feature_store:
+    lookback_days: 30
+    features:
+      transaction:
+        - amount
+        - amount_log
+        - hour_of_day
+        - day_of_week
+        - is_weekend
+        - amount_vs_user_avg
+        - amount_vs_user_p95
+        - velocity_1h
+        - velocity_24h
+        - velocity_7d
+      user:
+        - account_age_days
+        - total_orders_30d
+        - failed_payments_7d
+        - unique_countries_30d
+        - avg_order_amount
+        - chargeback_rate
+        - risk_tier_encoded
+      device:
+        - vpn_detected
+        - proxy_detected
+        - tor_detected
+        - is_new_device
+        - device_count_30d
+      geo:
+        - country_risk_score
+        - is_high_risk_country
+        - geo_velocity_flag
+
+# ---------------------------------------------------------------------------
+# Data Quality Configuration
+# ---------------------------------------------------------------------------
+data_quality:
+  run_on_layers: [bronze, silver]
+  fail_on_error: false
+  notification_on_failure: true
+  thresholds:
+    completeness_min: 0.95
+    uniqueness_min: 0.99
+    validity_min: 0.98
+
+# ---------------------------------------------------------------------------
+# Data Generator Configuration
+# ---------------------------------------------------------------------------
+generator:
+  events_per_second: 50
+  fraud_ratio: 0.03
+  batch_size: 10
+  anomaly_burst:
+    enabled: true
+    interval_minutes: 30
+    duration_seconds: 60
+    multiplier: 5
+  user_pool_size: 10000
+  product_pool_size: 1000
+  country_distribution:
+    US: 0.35
+    GB: 0.12
+    DE: 0.10
+    FR: 0.08
+    CA: 0.07
+    AU: 0.06
+    JP: 0.05
+    BR: 0.04
+    IN: 0.04
+    other: 0.09
+
+# ---------------------------------------------------------------------------
+# Monitoring Configuration
+# ---------------------------------------------------------------------------
+monitoring:
+  prometheus:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+  alerts:
+    fraud_rate_threshold: 0.10
+    payment_failure_rate_threshold: 0.05
+    pipeline_lag_seconds_threshold: 300

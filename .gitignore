@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache/
+.coverage
+coverage_report/
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ML Models (large files - use DVC or model registry)
+ml/models/registry/*.pkl
+ml/models/registry/*.joblib
+ml/models/registry/*.json
+!ml/models/registry/.gitkeep
+
+# Airflow
+airflow/logs/
+airflow/plugins/__pycache__/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+
+# Great Expectations
+data_quality/uncommitted/
+data_quality/checkpoints/
+data_quality/expectations/.ge_store_backend_id
+
+# Spark checkpoints (local runs)
+spark_jobs/checkpoints/
+spark_jobs/spark-warehouse/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Secrets (never commit these)
+.env
+.env.prod
+secrets/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+tmp/
+temp/

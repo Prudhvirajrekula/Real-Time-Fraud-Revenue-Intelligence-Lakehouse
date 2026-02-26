@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x:*)",
+      "Bash(make setup:*)",
+      "Bash(which podman:*)",
+      "Bash(brew install:*)",
+      "Bash(sudo mkdir:*)",
+      "Bash(sudo:*)",
+      "Bash(docker version:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker pull:*)",
+      "Bash(head:*)",
+      "Bash(docker run:*)",
+      "Bash(docker exec:*)",
+      "Bash(make create-topics:*)",
+      "Bash(make urls:*)",
+      "Bash(bash:*)",
+      "Bash(curl:*)",
+      "Bash(docker wait:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(which python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(docker cp tests/unit ml-server:/app/tests && docker exec ml-server python -m pytest /app/tests/unit/ -v --tb=short 2>&1)",
+      "Bash(docker cp tests/unit/. ml-server:/app/unit_tests && docker exec ml-server python -m pytest /app/unit_tests/ -v --tb=short 2>&1)",
+      "Bash(docker cp tests/unit/test_data_quality.py airflow-webserver:/opt/airflow/test_data_quality.py && \\\\\ndocker cp data_quality/validate.py airflow-webserver:/opt/airflow/validate.py && \\\\\ndocker exec -w /opt/airflow airflow-webserver python -m pytest /opt/airflow/test_data_quality.py -v --tb=short 2>&1)",
+      "Bash(docker cp dbt/packages.yml airflow-webserver:/opt/airflow/dbt/packages.yml && \\\\\ndocker exec airflow-webserver dbt deps --project-dir /opt/airflow/dbt --profiles-dir /opt/airflow/dbt --no-version-check 2>&1)",
+      "Bash(docker cp dbt/packages.yml airflow-webserver:/opt/airflow/dbt/packages.yml && \\\\\ndocker exec airflow-webserver dbt deps --project-dir /opt/airflow/dbt --profiles-dir /opt/airflow/dbt --no-version-check 2>&1 && \\\\\ndocker exec airflow-webserver dbt run --project-dir /opt/airflow/dbt --profiles-dir /opt/airflow/dbt --no-version-check --select dim_dates 2>&1)",
+      "Bash(tail:*)",
+      "Bash(sed:*)"
+    ]
+  }
+}

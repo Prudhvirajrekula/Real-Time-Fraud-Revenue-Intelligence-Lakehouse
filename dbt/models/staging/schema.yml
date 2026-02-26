@@ -1,0 +1,62 @@
+version: 2
+
+sources:
+  - name: gold
+    description: "Gold layer tables written by Spark aggregation jobs"
+    schema: gold
+    tables:
+      - name: revenue_daily
+        description: "Daily revenue aggregations by country, currency, payment method"
+        columns:
+          - name: event_date
+            tests: [not_null]
+          - name: total_orders
+            tests: [not_null]
+          - name: gmv
+            tests: [not_null]
+      - name: revenue_hourly
+        description: "Hourly revenue for real-time dashboards"
+      - name: fraud_summary
+        description: "Daily fraud KPIs by country and payment method"
+        columns:
+          - name: event_date
+            tests: [not_null]
+      - name: user_fraud_scores
+        description: "Per-user composite fraud risk scores (rolling 30d)"
+        columns:
+          - name: user_id
+            tests: [not_null, unique]
+      - name: product_metrics
+        description: "Revenue and volume by product category"
+
+models:
+  - name: stg_orders
+    description: "Staged order data with normalized KPIs"
+    columns:
+      - name: event_date
+        tests: [not_null]
+      - name: country_code
+        tests: [not_null]
+      - name: fraud_rate
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1
+
+  - name: stg_payments
+    description: "Staged payment summary by method and country"
+
+  - name: stg_fraud_events
+    description: "Staged fraud events with enriched signals"
+
+  - name: stg_user_risk
+    description: "Staged user risk profiles"
+    columns:
+      - name: user_id
+        tests: [not_null, unique]
+      - name: composite_risk_score
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1

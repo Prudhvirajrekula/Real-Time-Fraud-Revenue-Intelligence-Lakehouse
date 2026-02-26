@@ -1,0 +1,4 @@
+delta-spark==2.4.0
+pyyaml==6.0.1
+structlog==24.1.0
+psycopg2-binary==2.9.9

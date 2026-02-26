@@ -1,0 +1,49 @@
+name: fraud_intelligence
+version: '1.0.0'
+config-version: 2
+
+profile: fraud_intelligence
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  fraud_intelligence:
+    +materialized: view
+
+    staging:
+      +materialized: view
+      +schema: staging
+
+    intermediate:
+      +materialized: table
+      +schema: intermediate
+
+    marts:
+      +materialized: table
+      +schema: marts
+      revenue:
+        +materialized: table
+        +post-hook:
+          - "{{ create_indexes(this) }}"
+      fraud:
+        +materialized: table
+      dimensions:
+        +materialized: table
+
+seeds:
+  fraud_intelligence:
+    +schema: raw
+
+vars:
+  fraud_threshold: 0.70
+  lookback_days: 30
+  high_risk_countries: ['NG', 'RU', 'CN', 'MX', 'ZA', 'PH', 'BR']

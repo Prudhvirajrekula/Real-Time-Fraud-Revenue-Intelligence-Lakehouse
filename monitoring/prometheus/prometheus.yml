@@ -1,0 +1,44 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'local'
+    platform: 'fraud-intelligence'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers: []
+
+scrape_configs:
+  # Kafka metrics via kafka-exporter
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # PostgreSQL metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  # ML Server metrics (FastAPI /metrics endpoint)
+  - job_name: 'ml_server'
+    static_configs:
+      - targets: ['ml-server:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Data Generator metrics
+  - job_name: 'data_generator'
+    static_configs:
+      - targets: ['data-generator:8080']
+    scrape_interval: 15s
+
+  # Prometheus self-scrape
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
